@@ -1,6 +1,6 @@
 from lxml import etree as ET
 
-xml_path = '/Users/kaylaheslin/OneDrive - University of Pittsburgh/Islandora_Datastreams/EAD_MARC/UPitt EAD_MARC/working-erroll-garner-EAD.xml'
+xml_path = '/Path/to/xml/file.xml'
 xmlObject = ET.parse(xml_path)  # create an xml object that python can parse 
 root = xmlObject.getroot() #get the root of that object  
 print(root)
