@@ -1,0 +1,38 @@
+from lxml import etree as ET
+
+xml_path = '/Users/kaylaheslin/OneDrive - University of Pittsburgh/Islandora_Datastreams/EAD_MARC/UPitt EAD_MARC/working-erroll-garner-EAD.xml'
+xmlObject = ET.parse(xml_path)  # create an xml object that python can parse 
+root = xmlObject.getroot() #get the root of that object  
+print(root)
+
+collectionName = root.find('archdesc/did/unittitle').text
+print('We are working with ' + collectionName)
+
+
+
+series = root.find('archdesc/dsc') #first, we find all the series
+#in our EAD
+for serie in series.iterchildren(): #here we are accessing the C01
+    #elements in our EAD
+    serie_attributes = serie.attrib#rather than using titles of series
+    #we are going to isolate the series we want to make changes to
+    #based on the "id", as this is contained within the c01 tag
+    #print(serie_attributes['id'])
+    if serie_attributes['id'] == 'ref1160': #now we isolate. We only
+        #want to make changes to the series with the id == "ref219"
+        for item in serie.iterchildren():#now we access the children of that series
+            #print(item.attrib)
+            try:
+                if item.attrib['id'] == 'ref2066':
+                    print(item.tag)
+                    for children in item.iterchildren():
+                        #print(children)
+                        for dao in children.findall('dao'):
+                            print(dao.attrib['href'])
+            except KeyError:
+                print('key not there')
+
+            #item.findall('dao')#and we find only the item titles
+            #print(dao.attrib['href'])
+    else:
+        continue
