@@ -1,0 +1,50 @@
+from lxml import etree as ET
+import sys
+import glob
+import os.path
+from datetime import date
+
+
+# a script to add an element to MODS files. Here I am adding an identifier element, and the text of the
+#element text is based on the name of the file. This could easily be altered as needed. 
+base_dir = '/Base/Directory/where/files/live'
+target_dir = os.mkdir(os.path.join(base_dir, str(date.today()) + '-updated'))
+
+destination_dir = os.path.join(base_dir, str(date.today()) + '-updated')
+
+list_of_files = glob.glob('{}/*.xml'.format(base_dir))
+
+no_ids = []
+for file in list_of_files:
+    xmlObject = ET.parse(file)  # create an xml object that python can parse
+    root = xmlObject.getroot()  # get the root of that object  
+    NSMAP = root.nsmap
+
+    try:
+        # for mods_field in root.findall('.//mods:identifier[@type="pitt"]', NSMAP):
+        # print(mods_field.text)
+        if root.find('.//mods:identifier[@type="pitt"]', NSMAP) == None:
+            no_ids.append(file)
+    except:
+        # print('mods prefix not declared on the following file: {}'.format(file))
+        # for mods_field in root.findall('.//identifier[@type="pitt"]', NSMAP):
+        # print(mods_field.text)
+        if root.find('.//identifier[@type="pitt"]', NSMAP) == None:
+            no_ids.append(file)
+
+print("An identifier element will be created for {} mods files.".format(len(no_ids)))
+for F in no_ids:
+    mods_namespaces = 'http://www.loc.gov/mods/v3'  # define your namespace
+    mods = '{%s}' % mods_namespaces
+    ns_map = {'mods': mods_namespaces}
+    xmlobj = ET.parse(F)
+    root2 = xmlobj.getroot()
+
+    identifier = ET.SubElement(root2, mods + 'identifier', type="pitt")
+    identifier.text = str(F.split('_')[1])
+
+    directory_to_write_to = os.path.join(destination_dir, os.path.basename(F))
+
+    xmlString = ET.tostring(root2, encoding='utf-8')
+    with open(directory_to_write_to, 'wb') as nf:
+        nf.write(xmlString)
