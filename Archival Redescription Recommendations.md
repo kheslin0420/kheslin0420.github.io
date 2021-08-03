@@ -1,3 +1,3 @@
-#Background
+# Background
 
 This document was created as source for **suggestions** and **recommendations** of how to approach/think about archival redescription in Archives & Special collections. As such, the information provided here does not seek to be the definitive guide to the ongoing work of reparative redescritpion and should be seen as an ever evolving, iterative set of guidelines that archivists and the like can take inspiration from. I do not believe in dogmatic principles, and feel the archival profession rests too frequently on such. In light of this, I hope these recommendations will help archivists to think critically, ethically, and empathetically about the records we care for. 
