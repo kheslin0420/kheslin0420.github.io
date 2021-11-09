@@ -5,9 +5,9 @@ from lxml import etree as ET
 def get_all_barcodes(xml_path):
     xmlObject = ET.parse(xml_path)  # create an xml object that python can parse 
     root = xmlObject.getroot() #get the root of that object  
-    NSMAP = root.nsmap #define namespaces
-    NS2_Namespace = "http://www.w3.org/1999/xlink" #here I specify the namespace for the attribute I wish to access later
+    NSMAP = root.nsmap
+    NS2_Namespace = "http://www.w3.org/1999/xlink"
     NS2 = '{%s}' % NS2_Namespace
 
-    for dao in root.findall('.//dao', NSMAP): #xpath to find dao element in EAD 
-        print(dao.get(NS2 + 'href')) #get dao atribute "href" value 
+    for dao in root.findall('.//dao', NSMAP):
+        print(dao.get(NS2 + 'href'))
