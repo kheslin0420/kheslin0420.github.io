@@ -18,3 +18,9 @@ With all that being said, I must also point out that the scripts shared here wil
 
 I am providing this information via Github in the hopes that it will be accessed by a wide variety of individuals, but also, in hopes of making my own scripts *better*. I am, and there is no shame when I say this as we all start somewhere, a python novice. I do not claim to speak "pythonic," although I would love to be able to say so one day. The beauty of Github is that it acts very similarly to an archival repository. Any changes can be made while maintaining older versions. So, if you have a way to improve these scripts, I implore you to submit a 'commit' and 'pull request.' Selfishly, this will make the script better when I use it in the future, but for others, this will ensure they are using a collectively developed tool. 
 
+
+## Navigating the Files 
+
+To make things easier, I have provided all files related to archival redescription work in a folder titled [Legacy_Description_Audit](https://github.com/kheslin0420/kheslin0420.github.io/tree/master/Legacy_Description_Audit). Here you will find the python scripts created and used in the audit, as well as working files created to organize and record data associated with the project. 
+
+I have also included other directories for scripts used in my everyday work as an archivist. Many of these focus on manipultaing EAD or MODS data, or using the ArchivesSpace API for data manipulation/clean-up. 
