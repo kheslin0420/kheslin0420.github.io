@@ -52,7 +52,10 @@ with open('/Users/username/Dir/{}.csv'.format(csv_name), mode='w') as csv_file:
         title = ao['title']
         identifier = ''
         ref_id = ao['ref_id']
-        abstract = ''
+        if ao['notes'] != []:
+            abstract = ao['notes'][0]['subnotes'][0]['content']
+        else:
+            abstract = ''
         type_of_resource = ''
         creator = ''
         genre = ''
