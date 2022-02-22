@@ -230,5 +230,5 @@ for file in list_of_files:
 
 
     xmlString = ET.tostring(root2, encoding='utf-8', pretty_print=True)
-    with open(directory2 + file.split('/')[5], 'wb') as newfile:
+    with open(directory2 + '/' +file.split('/')[5], 'wb') as newfile:
         newfile.write(xmlString)
