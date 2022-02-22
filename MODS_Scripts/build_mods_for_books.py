@@ -205,7 +205,7 @@ with open(CSV_path, mode='r') as csvfile:
 
 #writes new MODS files with appropriate headers
 directory2 = input('MODS created, but headers need to be added. Specify directory for final MODS:')
-list_of_files = glob.glob(directory2+ '/*.xml')
+list_of_files = glob.glob(directory+ '/*.xml')
 for file in list_of_files:
     #print(file.split('/')[5])
     xmlObject = ET.parse(file)
@@ -230,5 +230,5 @@ for file in list_of_files:
 
 
     xmlString = ET.tostring(root2, encoding='utf-8', pretty_print=True)
-    with open('/Users/kaylaheslin/Desktop/new_mods/' + file.split('/')[5], 'wb') as newfile:
+    with open(directory2 + file.split('/')[5], 'wb') as newfile:
         newfile.write(xmlString)
