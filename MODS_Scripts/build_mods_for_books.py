@@ -205,7 +205,7 @@ with open(CSV_path, mode='r') as csvfile:
 
 #writes new MODS files with appropriate headers
 directory2 = input('MODS created, but headers need to be added. Specify directory for final MODS:')
-list_of_files = glob.glob(directory+ '/*.xml')
+list_of_files = glob.glob(directory1 + '/*.xml')
 for file in list_of_files:
     #print(file.split('/')[5])
     xmlObject = ET.parse(file)
