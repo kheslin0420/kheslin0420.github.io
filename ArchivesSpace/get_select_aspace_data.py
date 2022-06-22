@@ -12,13 +12,13 @@ import re
 from dateutil import parser
 from collections import Counter
 
-path = '/Users/kaylaheslin/Desktop'
-baseURL = 'https://pittapi.as.atlas-sys.com'
-user_name = 'kmh250'
-password = 'hL9xE4rC8cI6'
+path = input("Enter full path to Desktop or whereever you wish to store the CSV file:")
+baseURL = input("Enter baseURL for institution's Aspace instance:")
+user_name = input("Provide Aspace api username:")
+password = input("Provide Aspace api password:")
 repo = input("Enter repo number:")
 record_type = 'archival_objects'
-auth = requests.post('https://pittapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
+auth = requests.post(baseURL + '/users/{}/login?password={}'.format(user_name, password)).json()
 session = auth['session']
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36',
@@ -142,7 +142,7 @@ csv_mode = input(
 heirarchy = input('Is their heirarchy to this collection? y/n?:').lower()
 
 ##Nested archival objects
-with open('/Users/kaylaheslin/Desktop/{}.csv'.format(csv_path), mode=csv_mode) as csv_file:
+with open(path + '/{}.csv'.format(csv_path), mode=csv_mode) as csv_file:
     fieldnames = ['ref_id', 'ao_uri', 'title', 'identifier', 'normalized_date', 'normalized_date_qualifier',
                   'subject', 'subject_name', 'subject_geographic', 'description', 'type_of_resource', 'genre', 'creator', 'copyright_status',
                   'publication_status', 'source_collection_title', 'source_collection_id', 'source_series',
