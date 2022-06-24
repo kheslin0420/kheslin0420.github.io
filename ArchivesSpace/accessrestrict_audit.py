@@ -19,12 +19,12 @@ user_name = ''
 password = ''
 repo = 
 record_type = ''
-auth = requests.post('https://pittapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
+auth = requests.post(baseURL + '/users/{}/login?password={}'.format(user_name, password)).json()
 session = auth['session']
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36', 'X-ArchivesSpace-Session': session, 'Content_Type': 'application/json'}
 export_options = '?include_daos=true&numbered_cs=true&include_unpublished=false'
 
-aspaceURL = 'https://pittstaff.as.atlas-sys.com/'
+aspaceURL = ''
 
 
 with open('.csv', mode='w') as csv_file:
