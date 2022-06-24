@@ -20,7 +20,7 @@ user_name = 'username'
 password = 'password'
 repo = 'NUM'
 record_type = 'resources'
-auth = requests.post('https://pittapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
+auth = requests.post(baseURL + '/users/{}/login?password={}'.format(user_name, password)).json()
 session = auth['session']
 headers = {'X-ArchivesSpace-Session': session, 'Content_Type': 'application/json'}
 
