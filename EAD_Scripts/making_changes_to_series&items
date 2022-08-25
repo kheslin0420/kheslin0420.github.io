@@ -1,0 +1,45 @@
+from lxml import etree as ET
+
+ead_path = '/Path/to/xml/file.xml'
+lxmlobject = ET.parse(ead_path)
+root = lxmlobject.getroot()
+print(root)
+
+#lets find all of the item titles in series one of this collection
+series_one = root.find('archdesc/dsc/c01') #here we find the first
+#instance of a series (c01) in the ead
+for child in series_one.iterchildren(): #then we find the child
+#objects, which includes the items and some series description info
+    child.findall('did/unittitle')#now we isolate just the item titles
+    for child_title in child.findall('did/unittitle'):
+        print(child_title.text)#and here we are accessing their text
+
+print("series begin here:")
+#but what if we want items within a series that it not the
+#first in the EAD?
+series = root.find('archdesc/dsc') #first, we find all the series
+#in our EAD
+for serie in series.iterchildren(): #here we are accessing the C01
+    #elements in our EAD
+    serie_attributes = serie.attrib#rather than using titles of series
+    #we are going to isolate the series we want to make changes to
+    #based on the "id", as this is contained within the c01 tag
+    print(serie_attributes['id'])
+    if serie_attributes['id'] == 'ref219': #now we isolate. We only
+        #want to make changes to the series with the id == "ref219"
+        for item in serie.iterchildren():#now we access the children of that series
+            item.findall('did/unittitle')#and we find only the item titles
+            for item_title in item.findall('did/unittitle'): #and we access those item titles
+                #print(item_title.text)
+                new_name = item_title.text.replace(item_title.text, "Changes to title {}".format(item_title.text))
+                #above we define what changes we want to make
+                item_title.text = new_name #then we assign them back, make sure to do this
+                #or your changes wont be reflected in the EAD
+                print(item_title.text) #double checking 
+    else:
+        continue
+#to save changes see code below
+
+#xmlString = ET.tostring(root, encoding='utf-8')
+#with open('directory to write to', 'wb') as nf:
+    #nf.write(xmlString)
