@@ -2,6 +2,8 @@
 The files found within this directory are primarily python scripts created to work with archival metadata using the [Metadata Object Descriptive Schema](http://www.loc.gov/standards/mods/)(MODS).
 These scripts were developed for particular use cases within the Archives & Special Collections Department at Pitt. 
 
+The ['mods2csv.py'](https://github.com/kheslin0420/kheslin0420.github.io/blob/master/MODS_Scripts/mod2csv.py) script will flatten MODS XML into a CSV spreadsheet. However, BE AWARE that this script was developed with local MODs in mind and only captures and flattens the fields specified within the body of the script. This can be edited to include any and all MODS elements you wish to capture. Most elements can be accessed by referencing their xpath with attribute (ex: ".//mods:languageTerm[@type='code'][@authority='iso639-2b']"). These can be accessed using the .getelementvalue() module of the ModsElement () class. However, there are some elements that rely on parent level data to extract (ex: depositor, creator, and contributor information). These can be accessed using the .getcomplexelementvalue() module of the ModsElement() class.
+
 The ["add_copyright_element.py"](https://github.com/kheslin0420/kheslin0420.github.io/blob/master/MODS_Scripts/add_copyright_element.py) script creates an <accessCondition> tag and a child <copyrightMD:copyright> tag with attributes "copyright.status" and "publication.status."
 In our use case, we used this script to batch apply copyright status to archival objects missing this metadata field using a CSV spreadsheet. 
   
