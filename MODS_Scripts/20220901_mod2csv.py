@@ -42,11 +42,10 @@ class ModsElement:
 list_of_files = glob.glob('{}/*.xml'.format(file_dir))
 
 with open(csv_name, mode='w') as csv_file:
-    fieldnames = ['title', 'identifier', 'description', 'subject_element', 'subject_value', 'date_display', 'sort_date', 'normalized_date_qualifier', 'date_digitized',
-                  'normalized_date', 'language', 'creator', 'depositor', 'contributor', 'gift_of', 'genre', 'address',
-                  'type_of_resource', 'format', 'extent', 'publisher', 'publication_status',
-                  'copyright_status', 'source_id', 'source_citation', 'source_collection_id', 'source_collection_title',
-                  'source_collection_date', 'pub_place', 'source_series', 'source_subseries', 'source_container']
+    fieldnames = ['title','creator','subject_element','subject_value','description','normalized_date','normalized_date_qualifier','date_display',
+                         'sort_date','date_digitized','identifier','publication_status','copyright_status','type_of_resource','language','source_collection_title',
+                         'source_collection_id','source_collection_date','depositor','contributor','genre','address','format','extent',
+                         'publisher','source_id','source_citation','pub_place','source_series','source_subseries', 'source_other_level', 'source_container', 'gift_of']
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
     writer.writeheader()
 
@@ -85,6 +84,7 @@ with open(csv_name, mode='w') as csv_file:
         type_of_resource = ModsElement("mods:typeOfResource", namespaces, 'type_of_resource')
         source_series = ModsElement(".//mods:note[@type='series']", namespaces, 'series')
         source_subseries = ModsElement(".//mods:note[@type='subseries']", namespaces, 'subseries')
+        otherlevel = ModsElement(".//mods:note[@type='otherlevel']", namespaces, 'otherlevel')
         subject_value = ModsElement('subject_value', namespaces, 'subjectValue')
         subject_element = ModsElement('subject_element', namespaces, 'subject_element')
 
@@ -95,25 +95,37 @@ with open(csv_name, mode='w') as csv_file:
 
 
         writer.writerow({'title': title.get_element_value(),
-                         'identifier': pitt_ID.get_element_value(), 'description': abstract.get_element_value(),
-                         'subject_element': subject_element.get_element_value(), 'subject_value': subject_value.get_element_value(),
-                         'date_display': display_date.get_element_value(), 'sort_date': sort_date.get_element_value(),
+                         'creator': creator.get_complex_element(),
+                         'subject_element': subject_element.get_element_value(),
+                         'subject_value': subject_value.get_element_value(),
+                         'description': abstract.get_element_value(),
                          'normalized_date': normalizedDate.get_element_value(),
                          'normalized_date_qualifier': date_qualifier.get_element_attrib(),
+                         'date_display': display_date.get_element_value(),
+                         'sort_date': sort_date.get_element_value(),
                          'date_digitized': date_digitized.get_element_value(),
-                         'language': lang.get_element_value(), 'gift_of': donor.get_element_value(),
-                         'creator': creator.get_complex_element(), 'depositor': depositor.get_complex_element(),
-                        'contributor': contributor.get_complex_element(), 'genre': genre.get_element_value(),
-                         'address': address.get_element_value(),
-                        'type_of_resource': type_of_resource.get_element_value(), 'format': form.get_element_value(),
-                         'extent': extent.get_element_value(), 'publisher': publisher.get_element_value(),
+                         'identifier': pitt_ID.get_element_value(),
                          'publication_status': publication_status,
-                        'copyright_status': copyright_status, 'source_id': source_id.get_element_value(),
-                         'source_citation': prefercite.get_element_value(),
-                         'source_collection_id': source_collection_id.get_element_value(),
-                        'source_collection_date': source_collection_date.get_element_value(),
+                         'copyright_status': copyright_status,
+                         'type_of_resource': type_of_resource.get_element_value(),
+                         'language': lang.get_element_value(),
                          'source_collection_title': source_collection_title.get_element_value(),
-                         'pub_place': pub_place.get_element_value(), 'source_series': source_series.get_element_value(),
-                         'source_subseries':source_subseries.get_element_value(), 'source_container':container_info.get_element_value()})
+                         'source_collection_id': source_collection_id.get_element_value(),
+                         'source_collection_date': source_collection_date.get_element_value(),
+                         'depositor': depositor.get_complex_element(),
+                        'contributor': contributor.get_complex_element(),
+                         'genre': genre.get_element_value(),
+                         'address': address.get_element_value(),
+                         'format': form.get_element_value(),
+                         'extent': extent.get_element_value(),
+                         'publisher': publisher.get_element_value(),
+                         'source_id': source_id.get_element_value(),
+                         'source_citation': prefercite.get_element_value(),
+                         'pub_place': pub_place.get_element_value(),
+                         'source_series': source_series.get_element_value(),
+                         'source_subseries':source_subseries.get_element_value(),
+                         'source_other_level': otherlevel.get_element_value(),
+                         'source_container':container_info.get_element_value(),
+                         'gift_of': donor.get_element_value(),})
 
 print('MODS flattened!')
