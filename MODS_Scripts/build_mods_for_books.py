@@ -5,8 +5,10 @@ import sys
 import glob
 import os.path
 import datetime
+import sys
 
 mods_xml = input('Enter full path to mods XML file:\n')
+#mods_xml = '/Users/kaylaheslin/Downloads/Grammy-PCS-MODS-03.xml'
 xmlObject = ET.parse(mods_xml)  # create an xml object that python can parse
 print('Parsing xml data....')
 root = xmlObject.getroot()  # get the root of that object  
@@ -17,20 +19,25 @@ copyright_ns = 'http://www.cdlib.org/inside/diglib/copyrightMD'
 cp = '{%s}' % copyright_ns
 copyright_nsmap = {'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}
 CSV_path = input('Enter full path to extended csv:\n')
+#CSV_path = '/Users/kaylaheslin/Downloads/Extended_Grammy-PCS-Item-Results-03.csv'
 
-
-directory1 = input('Enter full path to the directory where you wish for the MODS files to be stored. \nExample: /Users/name/Desktop/mods4project\n')
+user_input = input("Enter full path name of directory where your MODS will be stored:")
+directory1 = user_input
 
 with open(CSV_path, mode='r') as csvfile:
     csv_reader = csv.DictReader(csvfile, delimiter=',')
     for row in csv_reader:
         mms_id = row['MMS ID']
         recID = root.xpath('.//*[contains(text(), "{}")]'.format(mms_id))
-        for i in recID:
-            recordInfo = i.getparent()
-            mods_xml = recordInfo.getparent()
-            tree = ET.ElementTree(mods_xml)
-            tree.write(directory1 + '/pitt_{}_MODS.xml'.format(row['identifier']))
+        if recID is True:
+            for i in recID:
+                recordInfo = i.getparent()
+                mods_xml = recordInfo.getparent()
+                tree = ET.ElementTree(mods_xml)
+                tree.write(directory1 + '/pitt_{}_MODS.xml'.format(row['identifier']))
+        else:
+            sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
+            
 #####Code above writes XML files for each row in the spreadsheet, based on its MMS ID
 
 ###Code below modifies those xml files based off of spreadsheet data'''
@@ -115,12 +122,15 @@ with open(CSV_path, mode='r') as csvfile:
                 copyright_status.attrib['publication.status'] = row['publication_status']
                 identifier.text = row['identifier']
 
-                if row['rights_holder'] == '':
+                try:
+                    if row['rights_holder'] == '':
+                        pass
+                    else:
+                        rights_holder = ET.SubElement(copyright_status, cp + 'rights.holder')
+                        rights_holder_name = ET.SubElement(rights_holder, cp + 'name')
+                        rights_holder_name.text = row['rights_holder']
+                except:
                     pass
-                else:
-                    rights_holder = ET.SubElement(copyright_status, cp + 'rights.holder')
-                    rights_holder_name = ET.SubElement(rights_holder, cp + 'name')
-                    rights_holder_name.text = row['rights_holder']
                 if row['extent'] == '':
                     pass
                 else:
@@ -207,7 +217,7 @@ with open(CSV_path, mode='r') as csvfile:
                 nf.write(xmlString)
 
 #writes new MODS files with appropriate headers
-directory2 = input('MODS created, but headers need to be added. Specify directory for final MODS:')
+print('MODS created, but headers need to be added. Processing now.....')
 list_of_files = glob.glob(directory1 + '/*.xml')
 for file in list_of_files:
     #print(file.split('/')[5])
@@ -231,5 +241,7 @@ for file in list_of_files:
 
 
     xmlString = ET.tostring(root2, encoding='utf-8', pretty_print=True)
-    with open(directory2 +'/' + file.split('/')[5], 'wb') as newfile:
+    with open(directory1 +'/' + file.split('/')[5], 'wb') as newfile:
         newfile.write(xmlString)
+
+print('Process complete!')
