@@ -41,7 +41,7 @@ class ModsElement:
 
 list_of_files = glob.glob('{}/*.xml'.format(file_dir))
 
-with open(csv_name, mode='w', encoding="utf-8") as csv_file:
+with open(csv_name, mode='w', encoding="utf-8", newline='') as csv_file:
     fieldnames = ['title','creator','subject_element','subject_value','description','normalized_date','normalized_date_qualifier','date_display',
                          'sort_date','date_digitized','identifier','publication_status','copyright_status','type_of_resource','language','source_collection_title',
                          'source_collection_id','source_collection_date','depositor','contributor','genre','address','format','extent',
