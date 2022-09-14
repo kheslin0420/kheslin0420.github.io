@@ -141,7 +141,7 @@ if auth != {'error': 'Login failed'}:
 
     ordered_records = requests.get(baseURL + r'/repositories/{}/resources/{}/ordered_records'.format(repo, resource_record_id), headers=headers).json()
 
-    with open(desktop + '{}.csv'.format(csv_path), mode=csv_mode, newline='', encoding='utf=8') as csv_file:
+    with open(path + '{}.csv'.format(csv_path), mode=csv_mode, newline='', encoding='utf=8') as csv_file:
         fieldnames = ['ref_id', 'ao_uri', 'title', 'identifier', 'normalized_date', 'normalized_date_qualifier',
                       'subject_topic', 'subject_name', 'subject_geographic', 'description', 'type_of_resource', 'genre', 'creator', 'copyright_status',
                       'publication_status', 'source_collection', 'source_collection_id', 'source_series',
