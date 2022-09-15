@@ -40,7 +40,7 @@ if auth != {'error': 'Login failed'}:
         def get_description(self):
             if self.notes != []:
                 try:
-                    description = self.notes[0].get('subnotes')[0].get('content')
+                    description = self.notes[0].get('subnotes')[0].get('content').replace('/n', ' ')
                     return description
                 except:
                     description = ''
@@ -182,7 +182,7 @@ if auth != {'error': 'Login failed'}:
                                 #print(do)
                                 ao_uri = do['linked_instances'][0]['ref']  # archival object for digital object
                                 identifier = do['digital_object_id']
-                                title = do['title']
+                                title = do['title'].strip()
                                 ao_1 = archival_object(uri=ao_uri, ref_id=a.get('ref_id'), notes=a.get('notes'), dates=a.get('dates'), ancestor=a.get('ancestors'), instances=a.get('instances'))
 
                                 description = ao_1.get_description()
