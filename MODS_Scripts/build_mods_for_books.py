@@ -23,8 +23,8 @@ CSV_path = input('Enter full path to extended csv:\n')
 user_input = input("Enter full path name of directory where your MODS will be stored:")
 directory1 = user_input
 
-with open(CSV_path, mode='r') as csvfile:
-    csv_reader = csv.DictReader(csvfile, delimiter=',')
+with open(CSV_path, mode='r', encoding="utf-8", newline='') as csvfile:
+    csv_reader = csv.DictReader(csvfile, delimiter=',', )
     for row in csv_reader:
         mms_id = row['MMS ID']
         recID = root.xpath('.//*[contains(text(), "{}")]'.format(mms_id))
@@ -47,8 +47,7 @@ with open(CSV_path, mode='r', encoding='utf-8', newline='') as csvfile:
         for file in list_of_files:
             xmlObject = ET.parse(file)  # create an xml object that python can parse
             r = xmlObject.getroot()
-            barcode = os.path.basename(file).split('_')[
-                1]  # create a variable that contains the barcode for each file by taking
+            barcode = os.path.basename(file).split('_')[1]  # create a variable that contains the barcode for each file by taking
             # only the relevant portion from the filename
             mods_namespaces = 'http://www.loc.gov/mods/v3'  # define your namespace
             mods = '{%s}' % mods_namespaces
@@ -253,11 +252,13 @@ for file in list_of_files:
 
     root2 = ET.Element(qname2, {qname1: 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd'},
                        nsmap=nsmap)
+    ID = r.xpath(".//mods:identifier[@type='pitt']", namespaces={'mods': 'http://www.loc.gov/mods/v3'})
+
     for child in r:
         root2.append(child)
 
     xmlString = ET.tostring(root2, encoding='utf-8', pretty_print=True)
-    with open(directory1 + '/' + file.split('/')[5], 'wb') as newfile:
+    with open(directory1 + '/' + f"pitt_{ID[0].text}_MODS.xml", 'wb') as newfile:
         newfile.write(xmlString)
 
 print('Process complete!')
