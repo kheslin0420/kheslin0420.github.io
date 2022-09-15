@@ -8,7 +8,6 @@ import datetime
 import sys
 
 mods_xml = input('Enter full path to mods XML file:\n')
-#mods_xml = '/Users/kaylaheslin/Downloads/Grammy-PCS-MODS-03.xml'
 xmlObject = ET.parse(mods_xml)  # create an xml object that python can parse
 print('Parsing xml data....')
 root = xmlObject.getroot()  # get the root of that object  
@@ -19,7 +18,7 @@ copyright_ns = 'http://www.cdlib.org/inside/diglib/copyrightMD'
 cp = '{%s}' % copyright_ns
 copyright_nsmap = {'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}
 CSV_path = input('Enter full path to extended csv:\n')
-#CSV_path = '/Users/kaylaheslin/Downloads/Extended_Grammy-PCS-Item-Results-03.csv'
+
 
 user_input = input("Enter full path name of directory where your MODS will be stored:")
 directory1 = user_input
@@ -29,33 +28,37 @@ with open(CSV_path, mode='r') as csvfile:
     for row in csv_reader:
         mms_id = row['MMS ID']
         recID = root.xpath('.//*[contains(text(), "{}")]'.format(mms_id))
-        if recID is True:
-            for i in recID:
+        for i in recID:
+            if i.text == mms_id:
                 recordInfo = i.getparent()
                 mods_xml = recordInfo.getparent()
                 tree = ET.ElementTree(mods_xml)
                 tree.write(directory1 + '/pitt_{}_MODS.xml'.format(row['identifier']))
-        else:
-            sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
-            
+            else:
+                sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
+
 #####Code above writes XML files for each row in the spreadsheet, based on its MMS ID
 
-###Code below modifies those xml files based off of spreadsheet data'''
-list_of_files = glob.glob(directory1+ '/*.xml')
-with open(CSV_path, mode='r') as csvfile:
+###Code below modifies those xml files based off of spreadsheet data
+list_of_files = glob.glob(directory1 + '/*.xml')
+with open(CSV_path, mode='r', encoding='utf-8', newline='') as csvfile:
     csv_reader = csv.DictReader(csvfile, delimiter=',')
     for row in csv_reader:
         for file in list_of_files:
             xmlObject = ET.parse(file)  # create an xml object that python can parse
             r = xmlObject.getroot()
-            barcode = os.path.basename(file).split('_')[1]  # create a variable that contains the barcode for each file by taking
+            barcode = os.path.basename(file).split('_')[
+                1]  # create a variable that contains the barcode for each file by taking
             # only the relevant portion from the filename
             mods_namespaces = 'http://www.loc.gov/mods/v3'  # define your namespace
             mods = '{%s}' % mods_namespaces
             copyright_ns = 'http://www.cdlib.org/inside/diglib/copyrightMD'
             cp = '{%s}' % copyright_ns
             copyright_nsmap = {'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}
-            nsmap = {'mods': 'http://www.loc.gov/mods/v3', 'xlink': 'http://www.w3.org/1999/xlink', 'ns2': 'http://www.w3.org/1999/xlink', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}
+            nsmap = {'mods': 'http://www.loc.gov/mods/v3', 'xlink': 'http://www.w3.org/1999/xlink',
+                     'ns2': 'http://www.w3.org/1999/xlink', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+                     'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}
+
 
             class Dates:  # create a class to handle dates in list format
                 def __init__(self, date_list):
@@ -70,10 +73,12 @@ with open(CSV_path, mode='r') as csvfile:
                     self.date_list = date_list
                     super().__init__(date_list)
 
-                def get_date_obj(self):  # create a function that will take the date list supplied in the class above and
+                def get_date_obj(
+                        self):  # create a function that will take the date list supplied in the class above and
                     # turn the list into a date object depending on the format of the date
                     if len(self.date_list) == 3:  # handles dates in YYYY, MM, DD format
-                        dt_obj = datetime.datetime(int(self.date_list[0]), int(self.date_list[1]), int(self.date_list[2]))
+                        dt_obj = datetime.datetime(int(self.date_list[0]), int(self.date_list[1]),
+                                                   int(self.date_list[2]))
                         return dt_obj
                     elif len(self.date_list) == 2:  # YYYY, MM
                         dt_obj = datetime.datetime(int(self.date_list[0]), int(self.date_list[1]), 1)
@@ -83,7 +88,8 @@ with open(CSV_path, mode='r') as csvfile:
                         return dt_obj
 
 
-            class Display_Date(Date_obj):  # create a new sublass that inherits from Date_Object sublass, so that we can create
+            class Display_Date(
+                Date_obj):  # create a new sublass that inherits from Date_Object sublass, so that we can create
                 # a display date using the date_object created above
                 def __init__(self, date_list,
                              dt_obj):  # here we do have a new attribute. We are passing the date list AND the date
@@ -103,9 +109,13 @@ with open(CSV_path, mode='r') as csvfile:
                         display_date = self.dt_obj.strftime("%Y")
                         return display_date
 
-            if row['identifier'] == barcode:  # compare the identifier in the CSV to the barcode variable we created above
-                access_condition = ET.SubElement(r, mods + 'accessCondition')  # removed mods namespace declaration "mods + 'accessCondition'"
-                copyright_status = ET.SubElement(access_condition, cp + 'copyright', nsmap=copyright_nsmap)  # removed copyright namespace declaration
+
+            if row[
+                'identifier'] == barcode:  # compare the identifier in the CSV to the barcode variable we created above
+                access_condition = ET.SubElement(r,
+                                                 mods + 'accessCondition')  # removed mods namespace declaration "mods + 'accessCondition'"
+                copyright_status = ET.SubElement(access_condition, cp + 'copyright',
+                                                 nsmap=copyright_nsmap)  # removed copyright namespace declaration
                 identifier = ET.SubElement(r, mods + 'identifier', type="pitt")  # removed mods namespace declaration
 
                 name = ET.SubElement(r, mods + 'name')  # creating a new subelement in the MODS tree
@@ -155,23 +165,29 @@ with open(CSV_path, mode='r') as csvfile:
                     sort_date = ET.SubElement(originInfo, mods + 'dateOther', type='sort')
                     display_date = ET.SubElement(originInfo, mods + 'dateOther', type='display')
                     normalized_date.text = row['normalized_date']
-                    if '/' in row['normalized_date']:  # assessing the date format from CSV. This helps to handle complex dates
+                    if '/' in row[
+                        'normalized_date']:  # assessing the date format from CSV. This helps to handle complex dates
                         try:
-                            split_date = row['normalized_date'].split('/')  # create two different dates to access individually by splitting on the /
+                            split_date = row['normalized_date'].split(
+                                '/')  # create two different dates to access individually by splitting on the /
                             d1 = split_date[0].split('-')  # create a variable containing the first date expression
                             d2 = split_date[1].split('-')  # create a variable containing the second date expression
-                            date_object1 = Date_obj(d1).get_date_obj()  # creating a class object and getting the datetime object from the class object
+                            date_object1 = Date_obj(
+                                d1).get_date_obj()  # creating a class object and getting the datetime object from the class object
                             date_object2 = Date_obj(d2).get_date_obj()
                             if row['display_date'] == '':
-                                display1 = Display_Date(d1, date_object1).get_display_date()  # creating a subclass object for display_date. MUST pass datetime object created above
+                                display1 = Display_Date(d1,
+                                                        date_object1).get_display_date()  # creating a subclass object for display_date. MUST pass datetime object created above
                                 display_date2 = Display_Date(d2, date_object2).get_display_date()
-                                display_date_string = str(display1) + ' - ' + str(display_date2)  # storing the display_date string in a variable
+                                display_date_string = str(display1) + ' - ' + str(
+                                    display_date2)  # storing the display_date string in a variable
                                 display_date.text = display_date_string  # assigning text of SubElement display_date
                                 sort_date.text = str(date_object1).replace(" ", "T")
                                 if row['normalized_date_qualifier'] == '':  # assess whether a "ca" date
                                     pass
                                 else:
-                                    normalized_date.set('qualifier','approximate')  # if yes, assign a new attribute to normalized_date element
+                                    normalized_date.set('qualifier',
+                                                        'approximate')  # if yes, assign a new attribute to normalized_date element
                                     display_date.text = 'ca. ' + display_date_string  # and precede display string with ca.
                             else:
                                 display_date.text = row['display_date']
@@ -212,15 +228,15 @@ with open(CSV_path, mode='r') as csvfile:
                 else:
                     source_id = ET.SubElement(r, mods + 'identifier', type='source')
                     source_id.text = row['source_identifier']
-            xmlString = ET.tostring(r, encoding='utf-8') #indenting
+            xmlString = ET.tostring(r, encoding='utf-8')  # indenting
             with open(file, 'wb') as nf:
                 nf.write(xmlString)
 
-#writes new MODS files with appropriate headers
+# writes new MODS files with appropriate headers
 print('MODS created, but headers need to be added. Processing now.....')
 list_of_files = glob.glob(directory1 + '/*.xml')
 for file in list_of_files:
-    #print(file.split('/')[5])
+    # print(file.split('/')[5])
     xmlObject = ET.parse(file)
     r = xmlObject.getroot()
     tree = ET.ElementTree(r)
@@ -235,13 +251,13 @@ for file in list_of_files:
              'ns2': 'http://www.w3.org/1999/xlink', 'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
              'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}  # removed copyright link
 
-    root2 = ET.Element(qname2, {qname1: 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd'}, nsmap=nsmap)
+    root2 = ET.Element(qname2, {qname1: 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd'},
+                       nsmap=nsmap)
     for child in r:
         root2.append(child)
 
-
     xmlString = ET.tostring(root2, encoding='utf-8', pretty_print=True)
-    with open(directory1 +'/' + file.split('/')[5], 'wb') as newfile:
+    with open(directory1 + '/' + file.split('/')[5], 'wb') as newfile:
         newfile.write(xmlString)
 
 print('Process complete!')
