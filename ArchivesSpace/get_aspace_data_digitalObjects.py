@@ -13,11 +13,11 @@ import re
 from dateutil import parser
 from collections import Counter
 
-path = input('Enter desktop path') 
+path = input('Enter desktop path: ') 
 baseURL = r'https://pittapi.as.atlas-sys.com'
-user_name = input('Enter Aspace username')
-password = input('Enter Aspace password')
-repo = input("Enter repo number:")
+user_name = input('Enter Aspace username: ')
+password = input('Enter Aspace password: ')
+repo = input("Enter repo number: ")
 auth = requests.post(r'https://pittapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
 if auth != {'error': 'Login failed'}:
     print('Login successful')
@@ -179,7 +179,7 @@ if auth != {'error': 'Login failed'}:
                             if value == 'digital_object':  # we only want to get do instances
                                 do = requests.get(baseURL + a['instances'][count][value]['ref'],
                                                   headers=headers).json()  # then we get the DO
-                                print(do)
+                                #print(do)
                                 ao_uri = do['linked_instances'][0]['ref']  # archival object for digital object
                                 identifier = do['digital_object_id']
                                 title = do['title']
