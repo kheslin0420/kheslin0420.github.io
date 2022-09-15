@@ -40,7 +40,7 @@ if auth != {'error': 'Login failed'}:
         def get_description(self):
             if self.notes != []:
                 try:
-                    description = self.notes[0].get('subnotes')[0].get('content').replace('/n', ' ')
+                    description = self.notes[0].get('subnotes')[0].get('content').replace('\n', ' ')
                     return description
                 except:
                     description = ''
