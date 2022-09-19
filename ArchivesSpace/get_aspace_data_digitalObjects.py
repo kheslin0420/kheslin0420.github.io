@@ -12,13 +12,13 @@ import re
 from dateutil import parser
 from collections import Counter
 
-path = '/Users/kaylaheslin/Desktop'
-baseURL = 'https://pittsbapi.as.atlas-sys.com'
-user_name = ''
-password = ''
-repo = input('Enter the Aspace repo number: ')
+path = input('Enter path to desktop: ')
+baseURL = 'https://pittapi.as.atlas-sys.com'
+user_name = input("Enter Aspace API username: ")
+password = input('Enter Aspace API password: ')
+repo = input('Enter repo number: ')
 record_type = 'archival_objects'
-auth = requests.post('https://pittsbapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
+auth = requests.post(baseURL + '/users/{}/login?password={}'.format(user_name, password)).json()
 if auth != {'error': 'Login failed'}:
     print('Login successful')
     session = auth['session']
@@ -35,7 +35,7 @@ if auth != {'error': 'Login failed'}:
             self.instances = instances
 
         def write_csv(self):
-            writer.writerow({'ref_id': self.ref_id, 'ao_uri': self.uri, 'title': title, 'identifier': identifier, 'normalized_date': normalized_date, 'description': description, 'type_of_resource': '', 'genre': '', 'creator': '','subject_topic': '', 'subject_name': '', 'subject_geographic':'','copyright_status': '', 'publication_status': '', 'source_series': source_series, 'source_subseries': source_subseries, 'source_other_level': source_otherlevel, 'source_container': source_container, 'source_collection': source_collection_title, 'source_collection_id': source_collection_ID, 'source_citation': source_citation, 'depositor': '', 'language': '', 'format': '', 'source_identifier': '', 'contributor': ''})
+            writer.writerow({'ref_id': self.ref_id, 'ao_uri': self.uri, 'title': title, 'identifier': identifier, 'normalized_date': normalized_date, 'description': description, 'type_of_resource': '', 'genre': '', 'creator': '','subject_topic': '', 'subject_name': '', 'subject_geographic':'','copyright_status': '', 'publication_status': '', 'source_series': source_series, 'source_subseries': source_subseries, 'source_other_level': source_otherlevel_concat, 'source_container': source_container, 'source_collection': source_collection_title, 'source_collection_id': source_collection_ID, 'source_citation': source_citation, 'depositor': '', 'language': '', 'format': '', 'source_identifier': '', 'contributor': ''})
 
         def get_description(self):
             if self.notes != []:
@@ -64,37 +64,6 @@ if auth != {'error': 'Login failed'}:
                 else:
                     date = date_expression
                     return date
-
-        def get_heirarchy(self):
-            heirarchy_list = []
-            source_otherlevel_list = []
-            for ancestor in self.ancestor:
-                level = ancestor.get('level')
-                if level == 'series':
-                    series_r = requests.get(baseURL + ancestor.get('ref'), headers=headers).json()
-                    source_series = series_r.get('display_string')
-                    heirarchy_list.insert(0, source_series)
-                else:
-                    series = ''
-                    heirarchy_list.insert(0, series)
-                if level == 'subseries':
-                    subseries_r = requests.get(baseURL + ancestor.get('ref'), headers=headers).json()
-                    source_subseries = subseries_r.get('display_string')
-                    heirarchy_list.insert(1, source_subseries)
-                else:
-                    subseries = ''
-                    heirarchy_list.insert(1, subseries)
-                if level != 'series' and 'subseries' and 'collection':
-                    otherlevel_r = requests.get(baseURL + ancestor.get('ref'), headers=headers).json()
-                    if otherlevel_r.get('display_string') != None:
-                        source_otherlevel_list.append(otherlevel_r.get('display_string'))
-                    source_otherlevel = ';'.join(source_otherlevel_list)
-                    heirarchy_list.insert(2, source_otherlevel)
-                else:
-                    source_otherlevel = ''
-                    heirarchy_list.insert(2, source_otherlevel)
-            return(heirarchy_list)
-
 
         def get_containers(self):
             if self.instances != []:
@@ -135,11 +104,11 @@ if auth != {'error': 'Login failed'}:
     resource_record_id = input('Enter the resource record ID (numnber only):')
 
     ordered_records = requests.get(baseURL + r'/repositories/{}/resources/{}/ordered_records'.format(repo, resource_record_id), headers=headers).json()
-    
-    print("There are {} ordered records in this finding aid (this is not the number of digital objects). The script must parse through each orded record to find all digital objects. if the number of ordered record is greater than 100, this may take some time. You woulld receive confirmation of a completed process at the end.".format(len(ordered_records)))
+
+    print("The script must parse through each orded record to find all digital objects in a finding aid. Depending on the size of the collection and number of ordered records, this may take sometime. You woulld receive confirmation of a completed process at the end.".format(len(ordered_records)))
 
     digital_objects = []
-    with open(csv_path, mode=csv_mode, newline='', encoding='utf=8') as csv_file:
+    with open(path + '/' + csv_path, mode=csv_mode, newline='', encoding='utf=8') as csv_file:
         fieldnames = ['ref_id', 'ao_uri', 'title', 'identifier', 'normalized_date', 'normalized_date_qualifier',
                       'subject_topic', 'subject_name', 'subject_geographic', 'description', 'type_of_resource', 'genre', 'creator', 'copyright_status',
                       'publication_status', 'source_collection', 'source_collection_id', 'source_series',
@@ -166,14 +135,14 @@ if auth != {'error': 'Login failed'}:
 
                         description = re.sub('<(?=\w)\w+\s\w+\S\S\w+\S>|<\S\w+>', '', ao_1.get_description())
                         normalized_date = ao_1.get_date()
-                        source_series = ao_1.get_heirarchy()[0]
-                        source_subseries = ao_1.get_heirarchy()[1]
-                        source_otherlevel = ao_1.get_heirarchy()[2]
                         source_container = ao_1.get_containers()
-
+                        
                         #print(description, normalized_date, source_series)
-
+                        
+                        levels = {}
                         for ancestor in ao['ancestors']:
+                            level = ancestor.get('level')
+                            levels.setdefault(level , ancestor.get('ref'))
                             if ancestor['level'] == 'collection':
                                 collection = requests.get(baseURL + ancestor['ref'], headers=headers).json()
                                 source_collection_title = collection['title']
@@ -185,6 +154,27 @@ if auth != {'error': 'Login failed'}:
                                         source_collection_ID = '.'.join([collection.get(item) for item in source_collection_ID_list])
                                         source_citation = collection['title'] + ', ' + collection['dates'][0]['expression'] + ', ' + source_collection_ID + ', ' + 'Archives & Special Collections, University of Pittsburgh'
 
+                        source_otherlevel_list = []
+                        if 'series' in levels:
+                            series_r = requests.get(baseURL + levels.get('series'), headers=headers).json()
+                            source_series = series_r.get('display_string')
+                        else:
+                            series = ''
+                        if 'subseries' in levels:
+                            subseries_r = requests.get(baseURL + levels.get('subseries'), headers=headers).json()
+                            source_subseries = subseries_r.get('display_string')
+                        else:
+                            source_subseries = ''
+                        if 'subgrp' in levels:
+                            otherlevel_r = requests.get(baseURL + levels['subgrp'], headers=headers).json()
+                            source_otherlevel = otherlevel_r.get('display_string')
+                            source_otherlevel_list.append(source_otherlevel)
+                        if 'otherlevel' in levels:
+                            otherlevel_r = requests.get(baseURL + levels['otherlevel'], headers=headers).json()
+                            source_otherlevel = otherlevel_r.get('display_string')
+                            source_otherlevel_list.append(source_otherlevel)
+
+                        source_otherlevel_concat = '; '.join(source_otherlevel_list)
                         ao_1.write_csv()
 
 else:
