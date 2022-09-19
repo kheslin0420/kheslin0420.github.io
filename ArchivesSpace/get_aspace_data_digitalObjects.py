@@ -1,4 +1,3 @@
-import json
 import requests
 import json
 import os
@@ -13,12 +12,13 @@ import re
 from dateutil import parser
 from collections import Counter
 
-path = input('Enter desktop path: ') 
-baseURL = r'https://pittapi.as.atlas-sys.com'
-user_name = input('Enter Aspace username: ')
-password = input('Enter Aspace password: ')
-repo = input("Enter repo number: ")
-auth = requests.post(r'https://pittapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
+path = '/Users/kaylaheslin/Desktop'
+baseURL = 'https://pittsbapi.as.atlas-sys.com'
+user_name = ''
+password = ''
+repo = input('Enter the Aspace repo number: ')
+record_type = 'archival_objects'
+auth = requests.post('https://pittsbapi.as.atlas-sys.com/users/{}/login?password={}'.format(user_name, password)).json()
 if auth != {'error': 'Login failed'}:
     print('Login successful')
     session = auth['session']
@@ -65,41 +65,36 @@ if auth != {'error': 'Login failed'}:
                     date = date_expression
                     return date
 
-        def get_series(self):
+        def get_heirarchy(self):
+            heirarchy_list = []
+            source_otherlevel_list = []
             for ancestor in self.ancestor:
                 level = ancestor.get('level')
                 if level == 'series':
                     series_r = requests.get(baseURL + ancestor.get('ref'), headers=headers).json()
                     source_series = series_r.get('display_string')
-                    return source_series
+                    heirarchy_list.insert(0, source_series)
                 else:
                     series = ''
-                    return series
-
-        def get_subseries(self):
-            for ancestor in self.ancestor:
-                level = ancestor.get('level')
+                    heirarchy_list.insert(0, series)
                 if level == 'subseries':
                     subseries_r = requests.get(baseURL + ancestor.get('ref'), headers=headers).json()
                     source_subseries = subseries_r.get('display_string')
-                    return source_subseries
+                    heirarchy_list.insert(1, source_subseries)
                 else:
                     subseries = ''
-                    return subseries
-
-        def get_otherLevel(self):
-            source_otherlevel_list = []
-            for ancestor in self.ancestor:
-                level = ancestor.get('level')
+                    heirarchy_list.insert(1, subseries)
                 if level != 'series' and 'subseries' and 'collection':
                     otherlevel_r = requests.get(baseURL + ancestor.get('ref'), headers=headers).json()
                     if otherlevel_r.get('display_string') != None:
                         source_otherlevel_list.append(otherlevel_r.get('display_string'))
                     source_otherlevel = ';'.join(source_otherlevel_list)
-                    return source_otherlevel
+                    heirarchy_list.insert(2, source_otherlevel)
                 else:
                     source_otherlevel = ''
-                    return source_otherlevel
+                    heirarchy_list.insert(2, source_otherlevel)
+            return(heirarchy_list)
+
 
         def get_containers(self):
             if self.instances != []:
@@ -135,13 +130,16 @@ if auth != {'error': 'Login failed'}:
                     source_container = ''
                     return source_container
 
-    csv_path = input("Enter name for CSV (only the name + '.csv' it will be saved directly to your Desktop):")
+    csv_path = input("Enter name for CSV (only the name. The '.csv' extension will be applied when saving the file to your Desktop):")
     csv_mode = input('Are you opening and writing a new CSV or appending to an exisiting one?\nEnter w for new and a for appending:')
     resource_record_id = input('Enter the resource record ID (numnber only):')
 
     ordered_records = requests.get(baseURL + r'/repositories/{}/resources/{}/ordered_records'.format(repo, resource_record_id), headers=headers).json()
+    
+    print("There are {} ordered records in this finding aid (this is not the number of digital objects). The script must parse through each orded record to find all digital objects. if the number of ordered record is greater than 100, this may take some time. You woulld receive confirmation of a completed process at the end.".format(len(ordered_records)))
 
-    with open(path + '/{}.csv'.format(csv_path), mode=csv_mode, newline='', encoding='utf=8') as csv_file:
+    digital_objects = []
+    with open(csv_path, mode=csv_mode, newline='', encoding='utf=8') as csv_file:
         fieldnames = ['ref_id', 'ao_uri', 'title', 'identifier', 'normalized_date', 'normalized_date_qualifier',
                       'subject_topic', 'subject_name', 'subject_geographic', 'description', 'type_of_resource', 'genre', 'creator', 'copyright_status',
                       'publication_status', 'source_collection', 'source_collection_id', 'source_series',
@@ -151,16 +149,33 @@ if auth != {'error': 'Login failed'}:
         writer.writeheader()
 
         for uri in ordered_records['uris']:
+            #print(uri)
             if uri['level'] =='item' or uri['level'] == 'file':
                 ref = requests.get(baseURL + uri['ref'], headers=headers).json()
+                #print(ref)
                 for i in ref['instances']:
-                    if i['instance_type'] == 'digital_object':
-                        a = requests.get(baseURL + uri['ref'], headers=headers).json()
-                        for ancestor in a['ancestors']:
+                    if i.get('digital_object') is not None:
+                        do = requests.get(baseURL + i.get('digital_object')['ref'], headers=headers).json()
+                        #print(do)
+                        identifier = do['digital_object_id']
+                        title = re.sub('<(?=\w)\w+\s\w+\S\S\w+\S>|<\S\w+>', '', do['title'].strip())
+                        ao = requests.get(baseURL + do['linked_instances'][0]['ref'], headers=headers).json()
+                        ao_1 = archival_object(uri=ao['uri'], ref_id=ao.get('ref_id'), notes=ao.get('notes'),
+                                               dates=ao.get('dates'), ancestor=ao.get('ancestors'),
+                                               instances=ao.get('instances'))
+
+                        description = re.sub('<(?=\w)\w+\s\w+\S\S\w+\S>|<\S\w+>', '', ao_1.get_description())
+                        normalized_date = ao_1.get_date()
+                        source_series = ao_1.get_heirarchy()[0]
+                        source_subseries = ao_1.get_heirarchy()[1]
+                        source_otherlevel = ao_1.get_heirarchy()[2]
+                        source_container = ao_1.get_containers()
+
+                        #print(description, normalized_date, source_series)
+
+                        for ancestor in ao['ancestors']:
                             if ancestor['level'] == 'collection':
-                                #print(ancestor)
                                 collection = requests.get(baseURL + ancestor['ref'], headers=headers).json()
-                                # print(json.dumps(collection, indent=2))
                                 source_collection_title = collection['title']
                                 source_collection_ID_list = []
                                 for item in collection:
@@ -168,33 +183,9 @@ if auth != {'error': 'Login failed'}:
                                     if x != None:
                                         source_collection_ID_list.append(x.group())
                                         source_collection_ID = '.'.join([collection.get(item) for item in source_collection_ID_list])
-                                source_citation = collection['title'] + ', ' + collection['dates'][0][
-                                    'expression'] + ', ' + source_collection_ID + ', ' + 'Archives & Special Collections, University of Pittsburgh'
+                                        source_citation = collection['title'] + ', ' + collection['dates'][0]['expression'] + ', ' + source_collection_ID + ', ' + 'Archives & Special Collections, University of Pittsburgh'
 
-                        instance_type_list = []
-                        for inst in a['instances']:
-                           #print(json.dumps(inst, indent=2))
-                            instance_type_list.append(inst['instance_type'])
-                        for count, value in enumerate(instance_type_list):  # enumerate the instance list
-                            if value == 'digital_object':  # we only want to get do instances
-                                do = requests.get(baseURL + a['instances'][count][value]['ref'],
-                                                  headers=headers).json()  # then we get the DO
-                                #print(do)
-                                ao_uri = do['linked_instances'][0]['ref']  # archival object for digital object
-                                identifier = do['digital_object_id']
-                                title = do['title'].strip().replace('\n', '')
-                                ao_1 = archival_object(uri=ao_uri, ref_id=a.get('ref_id'), notes=a.get('notes'), dates=a.get('dates'), ancestor=a.get('ancestors'), instances=a.get('instances'))
+                        ao_1.write_csv()
 
-                                description = ao_1.get_description()
-                                normalized_date = ao_1.get_date()
-                                source_series = ao_1.get_series()
-                                source_subseries = ao_1.get_subseries()
-                                source_otherlevel = ao_1.get_otherLevel()
-                                source_container = ao_1.get_containers()
-                                ao_1.write_csv()
-                            else:
-                                continue
-
-    print('process complete!')
 else:
     print('Authentication failed. Check username and password')
