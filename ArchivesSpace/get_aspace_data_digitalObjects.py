@@ -176,6 +176,8 @@ if auth != {'error': 'Login failed'}:
 
                         source_otherlevel_concat = '; '.join(source_otherlevel_list)
                         ao_1.write_csv()
+    
+    print('Process complete!')
 
 else:
     print('Authentication failed. Check username and password')
