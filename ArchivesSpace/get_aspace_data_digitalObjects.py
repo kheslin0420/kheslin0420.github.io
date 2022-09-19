@@ -108,7 +108,7 @@ if auth != {'error': 'Login failed'}:
     print("The script must parse through each orded record to find all digital objects in a finding aid. Depending on the size of the collection and number of ordered records, this may take sometime. You woulld receive confirmation of a completed process at the end.".format(len(ordered_records)))
 
     digital_objects = []
-    with open(path + '/' + csv_path, mode=csv_mode, newline='', encoding='utf=8') as csv_file:
+    with open(path + '/' + csv_path + '.csv', mode=csv_mode, newline='', encoding='utf=8') as csv_file:
         fieldnames = ['ref_id', 'ao_uri', 'title', 'identifier', 'normalized_date', 'normalized_date_qualifier',
                       'subject_topic', 'subject_name', 'subject_geographic', 'description', 'type_of_resource', 'genre', 'creator', 'copyright_status',
                       'publication_status', 'source_collection', 'source_collection_id', 'source_series',
