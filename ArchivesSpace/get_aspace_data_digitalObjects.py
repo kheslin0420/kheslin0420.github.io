@@ -105,7 +105,7 @@ if auth != {'error': 'Login failed'}:
 
     ordered_records = requests.get(baseURL + r'/repositories/{}/resources/{}/ordered_records'.format(repo, resource_record_id), headers=headers).json()
 
-    print("The script must parse through each orded record to find all digital objects in a finding aid. Depending on the size of the collection and number of ordered records, this may take sometime. You woulld receive confirmation of a completed process at the end.".format(len(ordered_records)))
+    print("The script must parse through each orded record to find all digital objects in a finding aid. Depending on the size of the collection and number of ordered records, this may take sometime. You will receive confirmation of a completed process at the end.")
 
     digital_objects = []
     with open(path + '/' + csv_path + '.csv', mode=csv_mode, newline='', encoding='utf=8') as csv_file:
