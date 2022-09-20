@@ -162,6 +162,6 @@ correct_df2.rename(columns={'title/titleInfo': 'title', 'typeOfResource': 'type_
 
 #data cleaning
 nan_value = float("NaN")
-correct_df2.replace("", nan_value, inplace=True)
+correct_df2.replace({'': nan_value, '; ': nan_value}, inplace=True)
 correct_df2.dropna(how='all', axis=1, inplace=True)
 correct_df2.to_csv(new_csv, index=False, header=True, encoding='utf-8')
