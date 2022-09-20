@@ -127,10 +127,8 @@ for file in list_of_files:
 
     master_dict.append(xml_dict2)
 
-
-#reorder and rename columns 
 df = pd.DataFrame.from_dict(master_dict)
-df.to_csv (csv_name, index = False, header=True, encoding='utf-8')
+df.to_csv (csv_name, index = False, header=True)
 
 new_csv = input('CSV has been created but headers need to be renamed and reindexed. Provide full pathname for new csv:')
 
@@ -148,7 +146,7 @@ for i in correct_df.columns.values:
     else:
         pass
 df_reorder = correct_df.reindex(columns=fieldnames)
-df_reorder.to_csv(new_csv, index=False, header=True, encoding='utf-8')
+df_reorder.to_csv(new_csv, index=False, header=True)
 
 new_df = pd.read_csv(new_csv)
 correct_df2 = new_df.copy()
@@ -162,4 +160,4 @@ correct_df2.rename(columns={'title/titleInfo': 'title', 'typeOfResource': 'type_
 nan_value = float("NaN")
 correct_df2.replace("", nan_value, inplace=True)
 correct_df2.dropna(how='all', axis=1, inplace=True)
-correct_df2.to_csv(new_csv, index=False, header=True, encoding='utf-8')
+correct_df2.to_csv(new_csv, index=False, header=True)
