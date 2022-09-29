@@ -28,11 +28,12 @@ class ModsElement:
             return elementname
 
     def get_complex_element(self):
-        if 'text' in self.additional_args.keys():
-            for element in root.iterfind(self.xpath, self.namespace):
-                if element is not None and element.text == self.additional_args['text']:
-                    elementname = element.getparent().getprevious().text
-                    return elementname
+        value_list = []
+        #if 'text' in self.additional_args.keys():
+        for element in root.findall(self.xpath, self.namespace):
+            if element is not None and element.text == self.additional_args['text']:
+                value_list.append(element.getparent().getprevious().text)
+                return value_list
 
     def get_element_attrib(self):
         if root.find(self.xpath, namespaces) is not None:
@@ -53,7 +54,6 @@ for file in list_of_files:
     root = xmlObject.getroot()  # get the root of that object
     namespaces = {'mods': 'http://www.loc.gov/mods/v3'}  # define your namespace
     copyright_ns = {'copyrightMD': 'http://www.cdlib.org/inside/diglib/copyrightMD'}
-
 
     xml_dictionary = {}
 
@@ -116,17 +116,27 @@ for file in list_of_files:
         else:
             xml_dict2[key] = xml_dict2[key]
 
+    creator_value_list = []
+    contributor_value_list = []
+    depositor_value_list = []
+    for e in root.findall('.//mods:namePart', namespaces):
+        if e.getnext().getchildren()[0].text == 'creator':
+            creator_value_list.append(e.text)
+        if e.getnext().getchildren()[0].text == 'contributor':
+            contributor_value_list.append(e.text)
+        if e.getnext().getchildren()[0].text == 'depositor':
+            depositor_value_list.append(e.text)
 
-    contributor = ModsElement('.//mods:roleTerm', namespaces, 'contributor', text='contributor')
-    creator = ModsElement('.//mods:roleTerm', namespaces, 'creator', text='creator')
-    depositor = ModsElement('.//mods:roleTerm', namespaces, 'depositor', text='depositor')
+    creator = '; '.join(creator_value_list)
+    contributor = '; '.join(contributor_value_list)
+    depositor = '; '.join(depositor_value_list)
     date_qualifier = ModsElement(".//mods:dateCreated[@qualifier='approximate'][@encoding='iso8601'][@keyDate='yes']", namespaces, 'date_qualifier')
 
     xml_dict2.setdefault('copyright_status', copyright_status)
     xml_dict2.setdefault('publication_status', publication_status)
-    xml_dict2.setdefault('contributor', contributor.get_complex_element())
-    xml_dict2.setdefault('creator', creator.get_complex_element())
-    xml_dict2.setdefault('depositor', depositor.get_complex_element())
+    xml_dict2.setdefault('contributor', contributor)
+    xml_dict2.setdefault('creator', creator)
+    xml_dict2.setdefault('depositor', depositor)
     xml_dict2.setdefault('normalized_date_qualifier', date_qualifier.get_element_attrib())
 
     master_dict.append(xml_dict2)
@@ -162,6 +172,6 @@ correct_df2.rename(columns={'title/titleInfo': 'title', 'typeOfResource': 'type_
 
 #data cleaning
 nan_value = float("NaN")
-correct_df2.replace({'': nan_value, '; ': nan_value}, inplace=True)
+correct_df2.replace({'': nan_value, '; ': nan_value, '; ; ': nan_value}, inplace=True)
 correct_df2.dropna(how='all', axis=1, inplace=True)
 correct_df2.to_csv(new_csv, index=False, header=True, encoding='utf-8')
