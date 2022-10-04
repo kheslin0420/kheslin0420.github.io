@@ -78,9 +78,9 @@ for file in list_of_files:
             for key in dict2:
                 if key != '\n      ' and key != '\n         ':
                     if dict2[key] != []:
-                        xml_dictionary.setdefault(i.replace('{http://www.loc.gov/mods/v3}', '') + '/' + dict2[key][-1] , []).append(key)
+                        xml_dictionary.setdefault(i.replace('{http://www.loc.gov/mods/v3}', '') + '/' + dict2[key][-1] , []).append(key.replace('\r', ' '))
                     else:
-                        xml_dictionary.setdefault(i.replace('{http://www.loc.gov/mods/v3}', ''), []).append(key)
+                        xml_dictionary.setdefault(i.replace('{http://www.loc.gov/mods/v3}', ''), []).append(key.replace('\r', ' '))
     #print(xml_dictionary)
 
     xml_dict2 = {}
@@ -120,12 +120,21 @@ for file in list_of_files:
     contributor_value_list = []
     depositor_value_list = []
     for e in root.findall('.//mods:namePart', namespaces):
-        if e.getnext().getchildren()[0].text == 'creator':
-            creator_value_list.append(e.text)
-        if e.getnext().getchildren()[0].text == 'contributor':
-            contributor_value_list.append(e.text)
-        if e.getnext().getchildren()[0].text == 'depositor':
-            depositor_value_list.append(e.text)
+        try:
+            if e.getnext().getchildren()[0].text == 'creator':
+                creator_value_list.append(e.text)
+        except AttributeError:
+            pass
+        try:
+            if e.getnext().getchildren()[0].text == 'contributor':
+                contributor_value_list.append(e.text)
+        except AttributeError:
+            pass
+        try:
+            if e.getnext().getchildren()[0].text == 'depositor':
+                depositor_value_list.append(e.text)
+        except AttributeError:
+            pass
 
     creator = '; '.join(creator_value_list)
     contributor = '; '.join(contributor_value_list)
