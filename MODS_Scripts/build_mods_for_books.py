@@ -6,6 +6,7 @@ import glob
 import os.path
 import datetime
 import sys
+import shutil
 
 mods_xml = input('Enter full path to mods XML file:\n')
 xmlObject = ET.parse(mods_xml)  # create an xml object that python can parse
