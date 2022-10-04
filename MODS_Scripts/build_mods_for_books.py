@@ -49,7 +49,7 @@ except FileNotFoundError:
                     recordInfo = i.getparent()
                     mods_xml = recordInfo.getparent()
                     tree = ET.ElementTree(mods_xml)
-                    path = os.path.join(directory1, '/pitt_{}_MODS.xml'.format(row['identifier']))
+                    path = os.path.join(directory1, f"/pitt_{row['identifier']}_MODS.xml")
                     tree.write(os.makedirs(path))
                 else:
                     sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
