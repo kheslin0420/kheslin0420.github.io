@@ -24,36 +24,24 @@ CSV_path = input('Enter full path to extended csv:\n')
 user_input = input("Enter full path name of directory where your MODS will be stored:")
 directory1 = user_input
 
-try:
-    with open(CSV_path, mode='r', encoding="utf-8", newline='') as csvfile:
-        csv_reader = csv.DictReader(csvfile, delimiter=',', )
-        for row in csv_reader:
-            mms_id = row['MMS ID']
-            recID = root.xpath('.//*[contains(text(), "{}")]'.format(mms_id))
-            for i in recID:
-                if i.text == mms_id:
-                    recordInfo = i.getparent()
-                    mods_xml = recordInfo.getparent()
-                    tree = ET.ElementTree(mods_xml)
-                    tree.write(directory1 + '/pitt_{}_MODS.xml'.format(row['identifier']))
-                else:
-                    sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
-except FileNotFoundError:
-    with open(CSV_path, mode='r', encoding="utf-8", newline='') as csvfile:
-        csv_reader = csv.DictReader(csvfile, delimiter=',', )
-        for row in csv_reader:
-            mms_id = row['MMS ID']
-            recID = root.xpath('.//*[contains(text(), "{}")]'.format(mms_id))
-            for i in recID:
-                if i.text == mms_id:
-                    recordInfo = i.getparent()
-                    mods_xml = recordInfo.getparent()
-                    tree = ET.ElementTree(mods_xml)
-                    path = os.path.join(directory1, f"/pitt_{row['identifier']}_MODS.xml")
-                    tree.write(os.makedirs(path))
-                else:
-                    sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
 
+with open(CSV_path, mode='r', encoding="utf-8", newline='') as csvfile:
+    csv_reader = csv.DictReader(csvfile, delimiter=',', )
+    for row in csv_reader:
+        mms_id = row['MMS ID']
+        recID = root.xpath('.//*[contains(text(), "{}")]'.format(mms_id))
+        for i in recID:
+            if i.text == mms_id:
+                recordInfo = i.getparent()
+                mods_xml = recordInfo.getparent()
+                tree = ET.ElementTree(mods_xml)
+                try:
+                    tree.write(directory1 + f"/pitt_{row['identifier']}_MODS.xml")
+                except FileNotFoundError:
+                    make_dir = os.makedirs(directory1)
+                    tree.write(directory1 + f"/pitt_{row['identifier']}_MODS.xml")
+            else:
+                sys.exit("MMS IDs not found in batch MODS. Check batch MODS to ensure it matches extended metadata csv.")
 #####Code above writes XML files for each row in the spreadsheet, based on its MMS ID
 
 ###Code below modifies those xml files based off of spreadsheet data
